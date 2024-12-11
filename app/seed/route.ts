@@ -82,6 +82,48 @@ async function seedQuotes() {
   `;
 }
 
+async function seedPosts() {
+
+
+  await client.sql`
+    CREATE TYPE post_status AS ENUM (
+      'private',
+      'published',
+      'scheduled',
+      'deleted',
+      'error',
+      'draft'
+    );
+  `;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS posts (
+      id SERIAL PRIMARY KEY,
+      author_id INT,
+      book_id INT,
+      quote_id INT,
+      creation_date TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      published_date TIMESTAMPTZ,
+      status post_status NOT NULL DEFAULT 'private',
+      text TEXT,
+      image_link TEXT,
+      platform TEXT,
+      FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE SET NULL,
+      FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE SET NULL,
+      FOREIGN KEY (quote_id) REFERENCES quotes(id) ON DELETE SET NULL
+    );
+  `;
+
+  return client.sql`
+        INSERT INTO posts (quote_id, text, image_link, platform, status)
+        VALUES (
+          1,
+          'Check out this inspiring quote from Mark Twain!',
+          'https://example.com/images/mark-twain-quote.jpg',
+          'Twitter',
+          'scheduled'
+        );
+      `;
+}
 
 async function seedUsers() {
   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
@@ -183,7 +225,7 @@ async function seedRevenue() {
 export async function GET() {
   try {
     await client.sql`BEGIN`;
-    await seedQuotes();
+    await seedPosts();
     // await seedAuthors();
     // await seedBooks();
     await client.sql`COMMIT`;

@@ -4,6 +4,85 @@ import { invoices, customers, revenue, users } from '../lib/placeholder-data';
 
 const client = await db.connect();
 
+async function seedAuthors() {
+  // await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS authors (
+      id SERIAL PRIMARY KEY,
+      name TEXT NOT NULL,
+      image TEXT,
+      born DATE,
+      death DATE,
+      description TEXT,
+      link TEXT
+    );
+  `;
+
+  return client.sql`
+    INSERT INTO authors (name, image, born, death, description, link)
+    VALUES (
+      'Mark Twain',
+      'https://publicdomainlibrary.org/uploads/attachments/floj4mxxqyi1ncjflxiu0rkt-marktwain-loc.max.webp',
+      '1835-11-30',
+      '1910-04-21',
+      'Mark Twain was an American writer, humorist, entrepreneur, publisher, and lecturer.',
+      'https://publicdomainlibrary.org/en/authors/mark-twain'
+    );
+  `;
+}
+
+
+async function seedBooks() {
+  // await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS books (
+      id SERIAL PRIMARY KEY,
+      cover TEXT,
+      title TEXT NOT NULL,
+      files TEXT,
+      language TEXT,
+      link TEXT,
+      author_id INT NOT NULL,
+      FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
+    );
+  `;
+
+  return client.sql`
+    INSERT INTO books (cover, title, files, language, link, author_id)
+    VALUES (
+      'https://publicdomainlibrary.org/uploads/attachments/hfwxzm491ppzdnih8jxtc78d-pdl-covers-the-adventures-of-huckleberry-finn.one-half.webp',
+      'The Adventures of Huckleberry Finn',
+      'https://publicdomainlibrary.org/uploads/attachments/j1h7f8zakusf7cm6knxws6cw-0009-the-adventures-of-huckleberry-finn-mark-twain.epub',
+      'English',
+      'https://publicdomainlibrary.org/en/books/the-adventures-of-huckleberry-finn',
+      1
+    );
+  `;
+}
+
+async function seedQuotes() {
+  await client.sql`
+    CREATE TABLE IF NOT EXISTS quotes (
+      id SERIAL PRIMARY KEY,
+      quote TEXT NOT NULL,
+      popularity INT,
+      book_id INT NOT NULL,
+      size INT GENERATED ALWAYS AS (length(quote)) STORED,
+      FOREIGN KEY (book_id) REFERENCES books(id) ON DELETE CASCADE
+    );
+  `;
+
+  return client.sql`
+    INSERT INTO quotes (quote, popularity, book_id)
+    VALUES (
+      '“All right, then, I''ll go to hell.”',
+      671,
+      1
+    );
+  `;
+}
+
+
 async function seedUsers() {
   await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await client.sql`
@@ -104,6 +183,22 @@ async function seedRevenue() {
 export async function GET() {
   try {
     await client.sql`BEGIN`;
+    await seedQuotes();
+    // await seedAuthors();
+    // await seedBooks();
+    await client.sql`COMMIT`;
+
+    return Response.json({ message: 'Database seeded successfully' });
+  } catch (error) {
+    await client.sql`ROLLBACK`;
+    return Response.json({ error }, { status: 500 });
+  }
+}
+
+/*
+export async function GET() {
+  try {
+    await client.sql`BEGIN`;
     await seedUsers();
     await seedCustomers();
     await seedInvoices();
@@ -116,3 +211,4 @@ export async function GET() {
     return Response.json({ error }, { status: 500 });
   }
 }
+*/

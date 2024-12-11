@@ -36,6 +36,9 @@ importers:
       next-auth:
         specifier: 5.0.0-beta.19
         version: 5.0.0-beta.19(next@15.0.3(react-dom@19.0.0-rc-cd22717c-20241013(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013))(react@19.0.0-rc-cd22717c-20241013)
+      oauth-1.0a:
+        specifier: ^2.2.6
+        version: 2.2.6
       postcss:
         specifier: 8.4.49
         version: 8.4.49
@@ -769,6 +772,9 @@ packages:
   npmlog@5.0.1:
     resolution: {integrity: sha512-AqZtDUWOMKs1G/8lwylVjrdYgqA4d9nu8hc+0gzRxlDb1I10+FHBGMXs6aiQHFdCUUlqH99MUMuLfzWDNDtfxw==}
     deprecated: This package is no longer supported.
+
+  oauth-1.0a@2.2.6:
+    resolution: {integrity: sha512-6bkxv3N4Gu5lty4viIcIAnq5GbxECviMBeKR3WX/q87SPQ8E8aursPZUtsXDnxCs787af09WPRBLqYrf/lwoYQ==}
 
   oauth4webapi@2.17.0:
     resolution: {integrity: sha512-lbC0Z7uzAFNFyzEYRIC+pkSVvDHJTbEW+dYlSBAlCYDe6RxUkJ26bClhk8ocBZip1wfI9uKTe0fm4Ib4RHn6uQ==}
@@ -1769,6 +1775,8 @@ snapshots:
       console-control-strings: 1.1.0
       gauge: 3.0.2
       set-blocking: 2.0.0
+
+  oauth-1.0a@2.2.6: {}
 
   oauth4webapi@2.17.0: {}
 

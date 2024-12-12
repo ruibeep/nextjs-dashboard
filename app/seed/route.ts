@@ -31,7 +31,6 @@ async function seedAuthors() {
   `;
 }
 
-
 async function seedBooks() {
   // await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await client.sql`

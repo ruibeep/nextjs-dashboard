@@ -1,77 +1,56 @@
-import OAuth from 'oauth-1.0a';
-import crypto from 'crypto';
-import axios from 'axios';
 
-// Export a named function for the POST method
-export async function POST(req: Request) {
+import { NextResponse } from 'next/server';
+import { TwitterApi } from 'twitter-api-v2';
+
+// Initialize Twitter client with OAuth 1.0a credentials
+const twitterClient = new TwitterApi({
+  appKey: process.env.X_API_KEY?.trim() || '',
+  appSecret: process.env.X_KEY_SECRET?.trim() || '',
+  accessToken: process.env.X_ACCESS_TOKEN?.trim() || '',
+  accessSecret: process.env.X_ACCESS_TOKEN_SECRET?.trim() || '',
+});
+
+console.log('Never makes it here!');
+
+
+// Get the read-write client
+const rwClient = twitterClient.readWrite;
+
+export async function POST(request: Request) {
   try {
-    // Parse the request body from the incoming request
-    const { text } = (await req.json()) as { text?: string };
+    // Parse the incoming JSON request body
+    const { text } = (await request.json()) as { text?: string };
 
+    // Validate the 'text' parameter
     if (!text || text.trim().length === 0) {
-      return new Response(
-        JSON.stringify({ message: 'Text is required' }),
+      return NextResponse.json(
+        { message: 'Text is required and cannot be empty.' },
         { status: 400 }
       );
     }
 
-    // Set up OAuth 1.0a configuration
-    const oauth = new OAuth({
-      consumer: {
-        key: process.env.X_API_KEY || '',
-        secret: process.env.X_API_SECRET || '',
-      },
-      signature_method: 'HMAC-SHA1',
-      hash_function(base_string, key) {
-        return crypto.createHmac('sha1', key).update(base_string).digest('base64');
-      },
-    });
+    // Post the tweet using the Twitter client (API v2)
+    const tweet = await rwClient.v2.tweet(text);
 
-    const token = {
-      key: process.env.X_ACCESS_TOKEN || '',
-      secret: process.env.X_ACCESS_TOKEN_SECRET || '',
-    };
-
-    const url = 'https://api.twitter.com/2/tweets';
-
-    const requestData = {
-      url,
-      method: 'POST',
-      // **Do not include body parameters (text) here**
-    };
-
-    // Authorize without including body parameters
-    const headers = oauth.toHeader(oauth.authorize(requestData, token));
-
-    // **Log the request details for debugging (ensure sensitive data is masked)**
-    // console.log('--- Preparing to send request to X API ---');
-    // console.log('URL:', url);
-    // console.log('Method:', requestData.method);
-    // console.log('Headers:', headers);
-    // console.log('Request Body:', { text });
-    // console.log('--- End of request details ---');
-
-    // Make the POST request to the X API with JSON body
-    const response = await axios.post(
-      url,
-      { text },
-      {
-        headers: {
-          ...headers,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
-
-    // Return success response
-    return new Response(
-      JSON.stringify({ message: 'Tweet posted successfully!', data: response.data }),
+    // Respond with success
+    return NextResponse.json(
+      { message: 'Tweet posted successfully!', data: tweet },
       { status: 200 }
     );
   } catch (error: any) {
-    console.error('Error posting to X:', error.response?.data || error.message);
-    return new Response(
-      JSON.stringify({ message: 'Failed to post tweet', error: error.response?.data }),
+    console.error('Error posting to X:', error);
+
+    // Handle specific Twitter API errors
+    if (error.code === 89) { // Invalid or expired token
+      return NextResponse.json(
+        { message: 'Invalid or expired token.', error: error },
+        { status: 401 }
+      );
+    }
+
+    // General server error
+    return NextResponse.json(
+      { message: 'Failed to post tweet.', error: error },
       { status: 500 }
     );
   }

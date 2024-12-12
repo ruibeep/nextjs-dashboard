@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server';
 import { TwitterApi } from 'twitter-api-v2';
 
+/*
 // Initialize Twitter client with OAuth 1.0a credentials
 const twitterClient = new TwitterApi({
   appKey: process.env.X_API_KEY?.trim() || '',
@@ -55,3 +56,4 @@ export async function POST(request: Request) {
     );
   }
 }
+*/

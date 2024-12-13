@@ -5,7 +5,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-great-gatsby',
-        book_id: 1
+        author_id: 1
     },
     {
         cover: null,
@@ -13,7 +13,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/pride-prejudice',
-        book_id: 2
+        author_id: 2
     },
     {
         cover: null,
@@ -21,7 +21,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/romeo-and-juliet',
-        book_id: 3
+        author_id: 3
     },
     {
         cover: null,
@@ -29,7 +29,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/little-women',
-        book_id: 4
+        author_id: 4
     },
     {
         cover: null,
@@ -37,7 +37,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/jane-eyre',
-        book_id: 5
+        author_id: 5
     },
     {
         cover: null,
@@ -45,7 +45,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/wuthering-heights',
-        book_id: 6
+        author_id: 6
     },
     {
         cover: null,
@@ -53,7 +53,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/frankenstein',
-        book_id: 7
+        author_id: 7
     },
     {
         cover: null,
@@ -61,7 +61,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-picture-of-dorian-gray',
-        book_id: 8
+        author_id: 8
     },
     {
         cover: null,
@@ -69,7 +69,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-adventures-of-huckleberry-finn',
-        book_id: 9
+        author_id: 9
     },
     {
         cover: null,
@@ -77,7 +77,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/dracula',
-        book_id: 10
+        author_id: 10
     },
     {
         cover: null,
@@ -85,7 +85,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-odyssey',
-        book_id: 11
+        author_id: 11
     },
     {
         cover: null,
@@ -93,7 +93,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/anne-of-green-gables',
-        book_id: 12
+        author_id: 12
     },
     {
         cover: null,
@@ -101,7 +101,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/a-tale-of-two-cities',
-        book_id: 13
+        author_id: 13
     },
     {
         cover: null,
@@ -109,7 +109,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-count-of-monte-cristo',
-        book_id: 14
+        author_id: 14
     },
     {
         cover: null,
@@ -117,7 +117,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/crime-and-punishment',
-        book_id: 15
+        author_id: 15
     },
     {
         cover: null,
@@ -125,7 +125,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/emma',
-        book_id: 2
+        author_id: 2
     },
     {
         cover: null,
@@ -133,7 +133,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/anna-karenina',
-        book_id: 16
+        author_id: 16
     },
     {
         cover: null,
@@ -141,7 +141,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/ebooks/les-misérables',
-        book_id: 17
+        author_id: 17
     },
     {
         cover: null,
@@ -149,7 +149,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/alice-s-adventures-in-wonderland',
-        book_id: 18
+        author_id: 18
     },
     {
         cover: null,
@@ -157,7 +157,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/moby-dick',
-        book_id: 19
+        author_id: 19
     },
     {
         cover: null,
@@ -165,7 +165,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-art-of-war',
-        book_id: 20
+        author_id: 20
     },
     {
         cover: null,
@@ -173,7 +173,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/wizard-of-oz',
-        book_id: 21
+        author_id: 21
     },
     {
         cover: null,
@@ -181,7 +181,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-iliad',
-        book_id: 11
+        author_id: 11
     },
     {
         cover: null,
@@ -189,7 +189,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-adventures-of-sherlock-holmes',
-        book_id: 22
+        author_id: 22
     },
     {
         cover: null,
@@ -197,7 +197,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-call-of-the-wild-novel-by-jack-london',
-        book_id: 23
+        author_id: 23
     },
     {
         cover: null,
@@ -205,7 +205,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/peter-pan',
-        book_id: 24
+        author_id: 24
     },
     {
         cover: null,
@@ -213,7 +213,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/meditations',
-        book_id: 25
+        author_id: 25
     },
     {
         cover: null,
@@ -221,7 +221,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-strange-case-of-dr-jekyll-and-mr-hyde',
-        book_id: 26
+        author_id: 26
     },
     {
         cover: null,
@@ -229,7 +229,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/le-morte-d-arthur',
-        book_id: 27
+        author_id: 27
     },
     {
         cover: null,
@@ -237,7 +237,7 @@ const books = [
         files: null,
         language: 'en',
         link: 'https://publicdomainlibrary.org/en/books/the-autobiography-of-benjamin-franklin',
-        book_id: 28
+        author_id: 28
     }
 ];
 

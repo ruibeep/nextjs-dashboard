@@ -37,7 +37,7 @@ async function seedAuthors() {
 
   return insertedAuthors; 
 }
-
+/*
 async function seedBooks() {
   await client.sql`
     CREATE TABLE IF NOT EXISTS books (
@@ -71,7 +71,7 @@ async function seedBooks() {
 
   return insertedBoooks; 
 }
-
+*/
 async function seedQuotes() {
   await client.sql`
     CREATE TABLE IF NOT EXISTS quotes (
@@ -244,7 +244,7 @@ export async function GET() {
   try {
     await client.sql`BEGIN`;
     // await seedAuthors();
-    await seedBooks();
+    // await seedBooks();
     // await seedQuotes();
     await client.sql`COMMIT`;
 

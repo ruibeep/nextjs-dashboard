@@ -243,9 +243,9 @@ async function seedRevenue() {
 export async function GET() {
   try {
     await client.sql`BEGIN`;
-    await seedAuthors();
-    // await seedBooks();
-    await seedQuotes();
+    // await seedAuthors();
+    await seedBooks();
+    // await seedQuotes();
     await client.sql`COMMIT`;
 
     return Response.json({ message: 'Database seeded successfully' });

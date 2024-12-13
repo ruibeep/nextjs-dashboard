@@ -1,43 +1,49 @@
 import bcrypt from 'bcrypt';
 import { db } from '@vercel/postgres';
 import { invoices, customers, revenue, users } from '../lib/placeholder-data';
+import { authors, books, quotes } from '../lib/publicdomainlibrary-data';
 
 const client = await db.connect();
 
 async function seedAuthors() {
-  // await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
+
   await client.sql`
     CREATE TABLE IF NOT EXISTS authors (
       id SERIAL PRIMARY KEY,
-      name TEXT NOT NULL,
+      name TEXT NOT NULL UNIQUE,
       image TEXT,
-      born DATE,
-      death DATE,
+      born DATE CHECK (born <= CURRENT_DATE), -- Ensures 'born' is not in the future
+      death DATE CHECK (death IS NULL OR death >= born), -- Ensures 'death' is after 'born'
       description TEXT,
       link TEXT
     );
   `;
+  
+  const insertedAuthors = await Promise.all(
+    authors.map(async (author: { name: string | number | boolean | null | undefined; image: string | number | boolean | null | undefined; birth: string | number | boolean | null | undefined; death: string | number | boolean | null | undefined; description: string | number | boolean | null | undefined; link: string | number | boolean | null | undefined; }) => {
+      return client.sql`
+        INSERT INTO authors (name, image, born, death, description, link)
+        VALUES (${author.name}, ${author.image}, ${author.birth}, ${author.death},${author.description},${author.link})
+        ON CONFLICT (name)
+        DO UPDATE SET
+          image = EXCLUDED.image,
+          born = EXCLUDED.born,
+          death = EXCLUDED.death,
+          description = EXCLUDED.description,
+          link = EXCLUDED.link;        
+            `;
+    }),
+  );
 
-  return client.sql`
-    INSERT INTO authors (name, image, born, death, description, link)
-    VALUES (
-      'Mark Twain',
-      'https://publicdomainlibrary.org/uploads/attachments/floj4mxxqyi1ncjflxiu0rkt-marktwain-loc.max.webp',
-      '1835-11-30',
-      '1910-04-21',
-      'Mark Twain was an American writer, humorist, entrepreneur, publisher, and lecturer.',
-      'https://publicdomainlibrary.org/en/authors/mark-twain'
-    );
-  `;
+  return insertedAuthors; 
 }
 
 async function seedBooks() {
-  // await client.sql`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`;
   await client.sql`
     CREATE TABLE IF NOT EXISTS books (
       id SERIAL PRIMARY KEY,
       cover TEXT,
-      title TEXT NOT NULL,
+      title TEXT NOT NULL UNIQUE,
       files TEXT,
       language TEXT,
       link TEXT,
@@ -46,24 +52,31 @@ async function seedBooks() {
     );
   `;
 
-  return client.sql`
-    INSERT INTO books (cover, title, files, language, link, author_id)
-    VALUES (
-      'https://publicdomainlibrary.org/uploads/attachments/hfwxzm491ppzdnih8jxtc78d-pdl-covers-the-adventures-of-huckleberry-finn.one-half.webp',
-      'The Adventures of Huckleberry Finn',
-      'https://publicdomainlibrary.org/uploads/attachments/j1h7f8zakusf7cm6knxws6cw-0009-the-adventures-of-huckleberry-finn-mark-twain.epub',
-      'English',
-      'https://publicdomainlibrary.org/en/books/the-adventures-of-huckleberry-finn',
-      1
-    );
-  `;
+  const insertedBoooks = await Promise.all(
+    books.map(async (book) => {
+      return client.sql`
+        INSERT INTO books (cover, title, files, language, link, author_id)
+        VALUES (${book.cover}, ${book.title}, ${book.files}, ${book.language},${book.link},${book.author_id})
+
+        ON CONFLICT (title)
+        DO UPDATE SET
+          cover = EXCLUDED.cover,
+          files = EXCLUDED.files,
+          language = EXCLUDED.language,
+          link = EXCLUDED.link,
+          author_id = EXCLUDED.author_id;
+            `;
+    }),
+  );
+
+  return insertedBoooks; 
 }
 
 async function seedQuotes() {
   await client.sql`
     CREATE TABLE IF NOT EXISTS quotes (
       id SERIAL PRIMARY KEY,
-      quote TEXT NOT NULL,
+      quote TEXT NOT NULL UNIQUE,
       popularity INT,
       book_id INT NOT NULL,
       size INT GENERATED ALWAYS AS (length(quote)) STORED,
@@ -71,14 +84,20 @@ async function seedQuotes() {
     );
   `;
 
-  return client.sql`
-    INSERT INTO quotes (quote, popularity, book_id)
-    VALUES (
-      '“All right, then, I''ll go to hell.”',
-      671,
-      1
-    );
-  `;
+  const insertedQuotes = await Promise.all(
+    quotes.map(async (quote) => {
+      return client.sql`
+        INSERT INTO quotes (quote, popularity, book_id)
+        VALUES (${quote.quote}, ${quote.popularity}, ${quote.book_id})
+
+        ON CONFLICT (quote)
+        DO UPDATE SET
+          popularity = EXCLUDED.popularity;
+            `;
+    }),
+  );
+
+  return insertedQuotes; 
 }
 
 async function seedPosts() {
@@ -224,9 +243,9 @@ async function seedRevenue() {
 export async function GET() {
   try {
     await client.sql`BEGIN`;
-    await seedPosts();
-    // await seedAuthors();
+    await seedAuthors();
     // await seedBooks();
+    await seedQuotes();
     await client.sql`COMMIT`;
 
     return Response.json({ message: 'Database seeded successfully' });

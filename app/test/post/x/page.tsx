@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 
 export default function Page() {
-  /*
+
   const [text, setText] = useState<string>('');
   const [responseMessage, setResponseMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -74,5 +74,4 @@ export default function Page() {
       {errorMessage && <p style={{ color: 'red' }}>{errorMessage}</p>}
     </div>
   );
-  */
 }

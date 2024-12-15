@@ -102,16 +102,18 @@ async function seedQuotes() {
 
 async function seedPosts() {
 
-
   await client.sql`
-    CREATE TYPE post_status AS ENUM (
-      'private',
-      'published',
-      'scheduled',
-      'deleted',
-      'error',
-      'draft'
-    );
+    DO $$
+    BEGIN
+      IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'post_status') THEN
+          CREATE TYPE post_status AS ENUM (
+            'private',
+            'published',
+            'scheduled',
+            'deleted'
+          );
+      END IF;
+    END $$;
   `;
   await client.sql`
     CREATE TABLE IF NOT EXISTS posts (
@@ -135,9 +137,9 @@ async function seedPosts() {
         INSERT INTO posts (quote_id, text, image_link, platform, status)
         VALUES (
           1,
-          'Check out this inspiring quote from Mark Twain!',
+          'Check out this inspiring quote!',
           'https://example.com/images/mark-twain-quote.jpg',
-          'Twitter',
+          'X',
           'scheduled'
         );
       `;
@@ -245,10 +247,11 @@ export async function GET() {
     await client.sql`BEGIN`;
     // await seedAuthors();
     // await seedBooks();
-    // await seedQuotes();
+    await seedQuotes();
+    // await seedPosts();
     await client.sql`COMMIT`;
 
-    return Response.json({ message: 'Database seeded successfully' });
+    return Response.json({ message: 'seedPosts: Database seeded successfully' });
   } catch (error) {
     await client.sql`ROLLBACK`;
     return Response.json({ error }, { status: 500 });

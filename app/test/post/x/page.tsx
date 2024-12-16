@@ -50,7 +50,7 @@ export default function Page() {
           rows={4}
           style={{ width: '100%', padding: '0.5rem', fontSize: '1rem' }}
           required
-          maxLength={280} // X's maximum tweet length
+          // maxLength={280} // X's maximum tweet length
         />
         <br />
         <button

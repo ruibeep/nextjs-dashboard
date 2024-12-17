@@ -1,4 +1,3 @@
-
 import { NextResponse } from 'next/server';
 import { TwitterApi } from 'twitter-api-v2';
 
@@ -10,9 +9,6 @@ const twitterClient = new TwitterApi({
   accessToken: process.env.X_ACCESS_TOKEN?.trim() || '',
   accessSecret: process.env.X_ACCESS_TOKEN_SECRET?.trim() || '',
 });
-
-console.log('Never makes it here!');
-
 
 // Get the read-write client
 const rwClient = twitterClient.readWrite;

@@ -1,17 +1,51 @@
 import { db } from "@vercel/postgres";
+import { formatISO, addDays, startOfDay, endOfDay} from 'date-fns';
+import { TwitterApi } from 'twitter-api-v2';
 
 const client = await db.connect();
 
 
+// Initialize Twitter client with OAuth 1.0a credentials
+const twitterClient = new TwitterApi({
+  appKey: process.env.X_API_KEY?.trim() || '',
+  appSecret: process.env.X_KEY_SECRET?.trim() || '',
+  accessToken: process.env.X_ACCESS_TOKEN?.trim() || '',
+  accessSecret: process.env.X_ACCESS_TOKEN_SECRET?.trim() || '',
+});
+
+// Fetch posts scheduled for today
+const fetchScheduledPosts = async () => {
+  const today = formatISO(new Date(), { representation: 'date' });
+  const todayStart = `${today} 00:00:00`;
+  const todayEnd = `${today} 23:59:59`;
+
+  const query = `
+    SELECT id, text, image_link, platform, published_date 
+    FROM posts
+    WHERE status = 'scheduled'
+      AND published_date BETWEEN $1 AND $2
+  `;
+  const values = [todayStart, todayEnd];
+  console.log(`FetchScheduledPosts: Query ${query}, Values: "${values}".`);
+
+
+  try {
+    const result = await db.query(query, values);
+    return result.rows;
+  } catch (error) {
+    console.error('Error fetching scheduled posts:', error.message);
+    throw error;
+  }
+};
+
 async function schedulePostForTomorrow() {
   // Step 1: Get tomorrow's date 
   const today = new Date();
-  const tomorrow = new Date(today);
-  tomorrow.setDate(today.getDate() + 1);
+  const tomorrow = addDays(today, 1);
 
-  // Format tomorrow's start and end times for PostgreSQL
-  const tomorrowStart = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')} 00:00:00`;
-  const tomorrowEnd = `${tomorrow.getFullYear()}-${String(tomorrow.getMonth() + 1).padStart(2, '0')}-${String(tomorrow.getDate()).padStart(2, '0')} 23:59:59`;
+  // Get the start and end of tomorrow
+  const tomorrowStart = formatISO(startOfDay(tomorrow), { representation: 'date' });
+  const tomorrowEnd = formatISO(endOfDay(tomorrow), { representation: 'date' });
 
   // Step 2: Check if there are already posts for tomorrow
   const existingPosts = await client.sql`
@@ -87,10 +121,32 @@ async function schedulePostForTomorrow() {
   return data.rows; 
 }
 
+// Post a single quote to Twitter
+const postToTwitter = async (text, imageLink) => {
+  try {
+    if (imageLink) {
+      // Post with media (requires uploading the media first)
+      const mediaId = await twitterClient.v1.uploadMedia(imageLink);
+      const response = await twitterClient.v1.tweet(text, { media_ids: mediaId });
+      console.log('Successfully posted with image:', response);
+      return response;
+    } else {
+      // Post text-only tweet
+      const response = await twitterClient.v2.tweet(text);
+      console.log('Successfully posted:', response);
+      return response;
+    }
+  } catch (error) {
+    console.error(`Error posting to Twitter: ${error.message}`);
+    throw error;
+  }
+};
 
 export async function GET() {
   try {
-  	return Response.json(await schedulePostForTomorrow());
+    //return Response.json(await fetchScheduledPosts());
+    return Response.json(await postToTwitter('10:37: hello world!', ''));
+  	//return Response.json(await schedulePostForTomorrow());
   } catch (error) {
   	return Response.json({ error }, { status: 500 });
   }

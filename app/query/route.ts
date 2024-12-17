@@ -228,8 +228,8 @@ export async function GET() {
 }
 
 
-
-export async function NEW_GET() {
+/*
+export async function GET() {
   try {
     console.log('Starting postScheduledQuotes...');
     const scheduledQuotesResult = await postScheduledQuotes();
@@ -263,3 +263,4 @@ export async function NEW_GET() {
     }
   }
 }
+*/

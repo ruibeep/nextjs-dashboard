@@ -152,11 +152,69 @@ const postToTwitter = async (text:string, imageLink?: string | null) => {
   }
 };
 
+// Update post status after successful publishing
+const updatePostStatus = async (postId) => {
+  const query = `
+    UPDATE posts
+    SET status = 'published'
+    WHERE id = $1
+  `;
+  const values = [postId];
+
+  try {
+    await db.query(query, values);
+    console.log(`Post ID ${postId} marked as published.`);
+  } catch (error) {
+    console.error(`Error updating post status for ID ${postId}:`, error.message);
+  }
+};
+
+// Main function to handle scheduled posts for today
+const postScheduledQuotes = async () => {
+  try {
+    console.log('Fetching scheduled posts...');
+    const scheduledPosts = await fetchScheduledPosts();
+
+    if (!scheduledPosts.length) {
+      console.log('No posts scheduled for today.');
+      return;
+    }
+
+    console.log(`Found ${scheduledPosts.length} posts for today. Posting...`);
+
+    for (const post of scheduledPosts) {
+      try {
+        await postToTwitter(post.text, post.image_link);
+        await updatePostStatus(post.id);
+        console.log(`Post ID ${post.id} published successfully.`);
+      } catch (error) {
+        
+
+        if (error instanceof Error) {
+          console.error(`Failed to publish post ID ${post.id}:`, error.message);
+        } else {
+          console.error(`Unpextected error while publishing post ID ${post.id}:`, error);
+        }
+        throw error; // Re-throw the error after logging         
+      }
+    }
+
+    console.log('All posts scheduled for today have been processed.');
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error processing scheduled posts:', error.message);
+    } else {
+      console.error('An unexpected error processing scheduled posts::', error);
+    }
+    throw error; // Re-throw the error after logging 
+  }
+};
 
 export async function GET() {
+  postScheduledQuotes();
   try {
     //return Response.json(await fetchScheduledPosts());
-    return Response.json(await postToTwitter('10:37: hello world!', ''));
+    //return Response.json(await postToTwitter('10:37: hello world!', ''));
   	//return Response.json(await schedulePostForTomorrow());
   } catch (error) {
   	return Response.json({ error }, { status: 500 });

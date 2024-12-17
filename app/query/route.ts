@@ -122,7 +122,7 @@ async function schedulePostForTomorrow() {
 }
 
 // Post a single quote to Twitter
-const postToTwitter = async (text, imageLink) => {
+const postToTwitter = async (text:string, imageLink?: string | null) => {
   try {
     if (imageLink) {
       // Post with media (requires uploading the media first)
@@ -137,10 +137,15 @@ const postToTwitter = async (text, imageLink) => {
       return response;
     }
   } catch (error) {
-    console.error(`Error posting to Twitter: ${error.message}`);
-    throw error;
+    if (error instanceof Error) {
+      console.error('Error fetching scheduled posts:', error.message);
+    } else {
+      console.error('An unexpected error occurred:', error);
+    }
+    throw error; // Re-throw the error after logging
   }
 };
+
 
 export async function GET() {
   try {

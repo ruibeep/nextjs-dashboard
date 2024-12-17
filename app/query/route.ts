@@ -226,3 +226,40 @@ export async function GET() {
   	return Response.json({ error }, { status: 500 });
   }
 }
+
+
+
+export async function NEW_GET() {
+  try {
+    console.log('Starting postScheduledQuotes...');
+    const scheduledQuotesResult = await postScheduledQuotes();
+    console.log('postScheduledQuotes completed.');
+
+    console.log('Starting schedulePostForTomorrow...');
+    const scheduleTomorrowResult = await schedulePostForTomorrow();
+    console.log('schedulePostForTomorrow completed.');
+
+    return Response.json({
+      success: true,
+      message: 'Both functions executed sequentially.',
+      results: {
+        scheduledQuotesResult,
+        scheduleTomorrowResult,
+      },
+    });
+  } catch (error) {
+    if (error instanceof Error) {
+      console.error('Error executing functions:', error.message);
+      return Response.json(
+        { success: false, message: error.message },
+        { status: 500 }
+      );
+    } else {
+      console.error('Unknown error occurred:', error);
+      return Response.json(
+        { success: false, message: 'An unknown error occurred.' },
+        { status: 500 }
+      );
+    }
+  }
+}

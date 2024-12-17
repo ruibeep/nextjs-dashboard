@@ -218,8 +218,8 @@ const postScheduledQuotes = async () => {
 
 export async function GET() {
   try {
-    //return Response.json(postScheduledQuotes());
-    return Response.json(await fetchScheduledPosts());
+    return Response.json(postScheduledQuotes());
+    //return Response.json(await fetchScheduledPosts());
     //return Response.json(await postToTwitter('10:37: hello world!', ''));
   	//return Response.json(await schedulePostForTomorrow());
   } catch (error) {

@@ -30,8 +30,11 @@ const fetchScheduledPosts = async () => {
 
 
   try {
-    const result = await db.query(query, values);
+    console.log('Going to run query');
+    const result = await db.query(query, values); // <-- here there is a problem
+    console.log('Going to return results');
     return result.rows;
+    
   } catch (error) {
     if (error instanceof Error) {
       console.error('Error fetching scheduled posts for Today:', error.message);
@@ -40,8 +43,6 @@ const fetchScheduledPosts = async () => {
     }
     throw error; // Re-throw the error after logging
   }
-
-
 };
 
 async function schedulePostForTomorrow() {
@@ -180,6 +181,7 @@ const postScheduledQuotes = async () => {
   try {
     console.log('Fetching scheduled posts...');
     const scheduledPosts = await fetchScheduledPosts();
+    console.log('Fetch scheduled posts done.');
 
     if (!scheduledPosts.length) {
       console.log('No posts scheduled for today.');
@@ -215,8 +217,8 @@ const postScheduledQuotes = async () => {
 };
 
 export async function GET() {
-  postScheduledQuotes();
   try {
+    return Response.json(postScheduledQuotes());
     //return Response.json(await fetchScheduledPosts());
     //return Response.json(await postToTwitter('10:37: hello world!', ''));
   	//return Response.json(await schedulePostForTomorrow());

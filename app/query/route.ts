@@ -153,7 +153,7 @@ const postToTwitter = async (text:string, imageLink?: string | null) => {
 };
 
 // Update post status after successful publishing
-const updatePostStatus = async (postId) => {
+const updatePostStatus = async (postId:number) => {
   const query = `
     UPDATE posts
     SET status = 'published'
@@ -165,7 +165,13 @@ const updatePostStatus = async (postId) => {
     await db.query(query, values);
     console.log(`Post ID ${postId} marked as published.`);
   } catch (error) {
-    console.error(`Error updating post status for ID ${postId}:`, error.message);
+    if (error instanceof Error) {
+      console.error(`Error updating post status for ID ${postId}:`, error.message);        
+    } else {
+      console.error(`Unpextected Error updating post status for ID ${postId}:`, error);
+    }
+    throw error; // Re-throw the error after logging         
+
   }
 };
 
@@ -188,8 +194,6 @@ const postScheduledQuotes = async () => {
         await updatePostStatus(post.id);
         console.log(`Post ID ${post.id} published successfully.`);
       } catch (error) {
-        
-
         if (error instanceof Error) {
           console.error(`Failed to publish post ID ${post.id}:`, error.message);
         } else {

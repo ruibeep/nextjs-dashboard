@@ -128,13 +128,30 @@ async function schedulePostForTomorrow() {
   return data.rows; 
 }
 
+async function downloadImage(url: string): Promise<Buffer> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to fetch image: ${response.statusText}`);
+  }
+  return Buffer.from(await response.arrayBuffer());
+}
+
 // Post a single quote to Twitter
 const postToTwitter = async (text:string, imageLink?: string | null) => {
   try {
     if (imageLink) {
-      // Post with media (requires uploading the media first)
-      const mediaId = await twitterClient.v1.uploadMedia(imageLink);
-      const response = await twitterClient.v1.tweet(text, { media_ids: mediaId });
+      console.log('Downloading image...');
+      const imageBuffer = await downloadImage(imageLink);
+
+      console.log('Uploading image to Twitter...');
+      const mediaId = await twitterClient.v1.uploadMedia(imageBuffer, { mimeType: 'image/jpeg' });
+
+      // Post with media
+      console.log('Making the post...');
+      // const response = await twitterClient.v2.tweet(text, { media_ids: [mediaId] });
+      const response = await twitterClient.v2.tweet({text: text, media:{ media_ids: [mediaId] }});
+
+
       console.log('Successfully posted with image:', response);
       return response;
     } else {
@@ -218,19 +235,6 @@ const postScheduledQuotes = async () => {
 
 export async function GET() {
   try {
-    return Response.json(await postScheduledQuotes());
-    //return Response.json(await fetchScheduledPosts());
-    //return Response.json(await postToTwitter('10:37: hello world!', ''));
-  	//return Response.json(await schedulePostForTomorrow());
-  } catch (error) {
-  	return Response.json({ error }, { status: 500 });
-  }
-}
-
-
-/*
-export async function GET() {
-  try {
     console.log('Starting postScheduledQuotes...');
     const scheduledQuotesResult = await postScheduledQuotes();
     console.log('postScheduledQuotes completed.');
@@ -263,4 +267,3 @@ export async function GET() {
     }
   }
 }
-*/

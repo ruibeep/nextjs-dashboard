@@ -33,9 +33,15 @@ const fetchScheduledPosts = async () => {
     const result = await db.query(query, values);
     return result.rows;
   } catch (error) {
-    console.error('Error fetching scheduled posts:', error.message);
-    throw error;
+    if (error instanceof Error) {
+      console.error('Error fetching scheduled posts for Today:', error.message);
+    } else {
+      console.error('Unkown error fetching scheduled posts for Today:', error);
+    }
+    throw error; // Re-throw the error after logging
   }
+
+
 };
 
 async function schedulePostForTomorrow() {

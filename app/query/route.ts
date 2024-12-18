@@ -1,9 +1,10 @@
 import { db } from "@vercel/postgres";
+import type { NextRequest } from 'next/server'
 import { formatISO, addDays, startOfDay, endOfDay} from 'date-fns';
 import { TwitterApi } from 'twitter-api-v2';
 
+// Todo: connection to the database should be requested only after checking CRON_SECRET
 const client = await db.connect();
-
 
 // Initialize Twitter client with OAuth 1.0a credentials
 const twitterClient = new TwitterApi({
@@ -233,7 +234,14 @@ const postScheduledQuotes = async () => {
   }
 };
 
-export async function GET() {
+export async function GET(request: NextRequest) {
+  const authHeader = request.headers.get('authorization');
+  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+    return new Response('Unauthorized', {
+      status: 401,
+    });
+  }   
+  
   try {
     console.log('Starting postScheduledQuotes...');
     const scheduledQuotesResult = await postScheduledQuotes();

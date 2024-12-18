@@ -1,0 +1,9 @@
+{
+    "crons": [
+      {
+        "_comment":"This is a a cronjob that runs everyday at 11.00",
+        "path": "/api/hello",
+        "schedule": "0 11 * * *"        
+      }
+    ]
+}

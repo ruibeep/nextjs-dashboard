@@ -48,11 +48,9 @@ const fetchScheduledPosts = async () => {
 async function schedulePostForTomorrow() {
   // Step 1: Get tomorrow's date 
   const today = new Date();
-  const tomorrow = addDays(today, 1);
-
-  // Get the start and end of tomorrow
-  const tomorrowStart = formatISO(startOfDay(tomorrow), { representation: 'date' });
-  const tomorrowEnd = formatISO(endOfDay(tomorrow), { representation: 'date' });
+  const tomorrow = formatISO(addDays(today, 1), { representation: 'date' });
+  const tomorrowStart = `${tomorrow} 00:00:00`;
+  const tomorrowEnd = `${tomorrow} 23:59:59`;
 
   // Step 2: Check if there are already posts for tomorrow
   const existingPosts = await client.sql`

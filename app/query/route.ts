@@ -90,6 +90,7 @@ async function schedulePostForTomorrow() {
       q.quote AS quote,
       b.id AS book_id,
       b.title AS book_title,
+      b.cover AS book_cover,
       a.name AS author_name,
       q.popularity
     FROM quotes q
@@ -114,10 +115,11 @@ async function schedulePostForTomorrow() {
   const postText = `"${item.quote}" - ${item.book_title} by ${item.author_name}`;
   // Step 5: Insert the new post for tomorrow
   const data = await client.sql`
-    INSERT INTO posts (quote_id, text, platform, status, published_date)
+    INSERT INTO posts (quote_id, text, image_link, platform, status, published_date)
     VALUES (
       ${item.quote_id},
       ${postText},
+      ${item.book_cover},
       'X',
       'scheduled',
       ${tomorrowStart}

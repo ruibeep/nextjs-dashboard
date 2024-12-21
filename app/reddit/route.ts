@@ -1,4 +1,4 @@
-// import snoowrap, { Submission } from 'snoowrap';
+import snoowrap, { Submission } from 'snoowrap';
 // import { NextResponse } from 'next/server';
 /*
 // Initialize snoowrap with trimmed environment variables

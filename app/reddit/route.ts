@@ -1,4 +1,5 @@
 import snoowrap, { Submission } from 'snoowrap';
+import { NextResponse } from 'next/server';
 
 
 // Initialize snoowrap with trimmed environment variables
@@ -9,7 +10,6 @@ const r = new snoowrap({
   username: process.env.REDDIT_USERNAME?.trim() || '',
   password: process.env.REDDIT_PASSWORD?.trim() || '',
 });
-
 
 // Function to fetch and return top 10 hot posts from a subreddit
 const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Submission[]> => {
@@ -23,6 +23,23 @@ const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Sub
   }
 };
 
+export async function GET() {
+  try {
+    const posts = await fetchHotPosts('javascript');
+    // Map the posts to a simpler format if needed
+    const formattedPosts = posts.map((post) => ({
+      title: post.title,
+      score: post.score,
+      url: post.url,
+    }));
+    return NextResponse.json({ posts: formattedPosts });
+  } catch (error) {
+    console.error('GET /reddit error:', error);
+    return NextResponse.json({ error: 'Failed to fetch posts.' }, { status: 500 });
+  }
+}
+
+
 // Example usage (for testing purposes)
 /*
 fetchHotPosts('javascript')
@@ -35,25 +52,6 @@ fetchHotPosts('javascript')
     console.error('Error:', error);
   });
 */
-export async function GET() {
-  try {
-    const posts = await fetchHotPosts('javascript');
-    // Map the posts to a simpler format if needed
-    const formattedPosts = posts.map((post) => ({
-      title: post.title,
-      score: post.score,
-      url: post.url,
-    }));
-    return new Response(JSON.stringify({ posts: formattedPosts }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    });
-  } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to fetch posts.' }), { status: 500 });
-  }
-}
-
-
 /*
 // Function to validate that all required environment variables are provided
 const validateEnvVariables = (): void => {

@@ -1,6 +1,6 @@
 import snoowrap, { Submission } from 'snoowrap';
 // import { NextResponse } from 'next/server';
-/*
+
 // Initialize snoowrap with trimmed environment variables
 const r = new snoowrap({
   userAgent: process.env.REDDIT_USER_AGENT?.trim() || '',
@@ -9,7 +9,7 @@ const r = new snoowrap({
   username: process.env.REDDIT_USERNAME?.trim() || '',
   password: process.env.REDDIT_PASSWORD?.trim() || '',
 });
-
+/*
 // Function to fetch and return top 10 hot posts from a subreddit
 const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Submission[]> => {
   try {

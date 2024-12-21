@@ -24,6 +24,7 @@ const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Sub
 };
 
 // Example usage (for testing purposes)
+/*
 fetchHotPosts('javascript')
   .then((posts) => {
     posts.forEach((post) => {
@@ -33,7 +34,7 @@ fetchHotPosts('javascript')
   .catch((error) => {
     console.error('Error:', error);
   });
-
+*/
 export async function GET() {
   try {
     const posts = await fetchHotPosts('javascript');

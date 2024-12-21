@@ -1,7 +1,6 @@
-import snoowrap, { Submission } from 'snoowrap';
-import { NextResponse } from 'next/server';
-
-
+// import snoowrap, { Submission } from 'snoowrap';
+// import { NextResponse } from 'next/server';
+/*
 // Initialize snoowrap with trimmed environment variables
 const r = new snoowrap({
   userAgent: process.env.REDDIT_USER_AGENT?.trim() || '',
@@ -22,7 +21,15 @@ const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Sub
     throw error; // Rethrow to handle it in the caller
   }
 };
-
+*/
+export async function GET() {
+  try {
+    return Response.json({ message: 'Reddit' });
+  } catch (error) {
+    return Response.json({ error }, { status: 500 });
+  }
+}
+/*
 export async function GET() {
   try {
     const posts = await fetchHotPosts('javascript');
@@ -38,7 +45,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch posts.' }, { status: 500 });
   }
 }
-
+*/
 
 // Example usage (for testing purposes)
 /*

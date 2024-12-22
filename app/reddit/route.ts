@@ -17,7 +17,7 @@ async function submitLinkWithFlair(redditClient, subreddit, title, url, flairId,
     const subredditObj = redditClient.getSubreddit(subreddit);
 
     // Prepare the options for the submission
-    const options = {
+    const options : any = {
       title: title,
       url: url,
       resubmit: false,

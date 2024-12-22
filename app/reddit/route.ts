@@ -1,5 +1,5 @@
 import snoowrap, { Submission } from 'snoowrap';
-// import { NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 
 // Initialize snoowrap with trimmed environment variables
 const r = new snoowrap({
@@ -9,7 +9,7 @@ const r = new snoowrap({
   username: process.env.REDDIT_USERNAME?.trim() || '',
   password: process.env.REDDIT_PASSWORD?.trim() || '',
 });
-/*
+
 // Function to fetch and return top 10 hot posts from a subreddit
 const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Submission[]> => {
   try {
@@ -21,15 +21,7 @@ const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Sub
     throw error; // Rethrow to handle it in the caller
   }
 };
-*/
-export async function GET() {
-  try {
-    return Response.json({ message: 'Reddit' });
-  } catch (error) {
-    return Response.json({ error }, { status: 500 });
-  }
-}
-/*
+
 export async function GET() {
   try {
     const posts = await fetchHotPosts('javascript');
@@ -45,7 +37,7 @@ export async function GET() {
     return NextResponse.json({ error: 'Failed to fetch posts.' }, { status: 500 });
   }
 }
-*/
+
 
 // Example usage (for testing purposes)
 /*

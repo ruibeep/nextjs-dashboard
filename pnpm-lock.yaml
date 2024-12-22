@@ -12,6 +12,9 @@ importers:
 
   .:
     dependencies:
+      0reddit:
+        specifier: ^0.0.1
+        version: 0.0.1
       '@heroicons/react':
         specifier: ^2.2.0
         version: 2.2.0(react@19.0.0-rc-cd22717c-20241013)
@@ -90,6 +93,9 @@ importers:
         version: types-react-dom@19.0.0-rc.1
 
 packages:
+
+  0reddit@0.0.1:
+    resolution: {integrity: sha512-Fdrmyyejw3bg0XuoB5S4qsSDReHUL6y1WJsjPNftQMOD2COTk8rUgqem/kPFIgLkbEgOpUrGc7BcbjktyUXcyA==}
 
   '@alloc/quick-lru@5.2.0':
     resolution: {integrity: sha512-UrcABB+4bUrFABwbluTIBErXwvbsU/V7TZWfmbgJfbkwiBuziS9gxdODUyuiecfdGQ85jglMW6juS3+z5TsKLw==}

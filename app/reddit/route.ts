@@ -1,94 +1,92 @@
-import snoowrap, { Submission } from 'snoowrap';
-import { NextResponse } from 'next/server';
+const snoowrap = require('snoowrap');
+const { NextResponse } = require('next/server');
 
-// Initialize snoowrap with trimmed environment variables
-const r = new snoowrap({
-  userAgent: process.env.REDDIT_USER_AGENT?.trim() || '',
-  clientId: process.env.REDDIT_CLIENT_ID?.trim() || '',
-  clientSecret: process.env.REDDIT_CLIENT_SECRET?.trim() || '',
-  username: process.env.REDDIT_USERNAME?.trim() || '',
-  password: process.env.REDDIT_PASSWORD?.trim() || '',
-});
-
-// Function to fetch and return top 10 hot posts from a subreddit
-const fetchHotPosts = async (subreddit: string, limit: number = 10): Promise<Submission[]> => {
+/**
+ * Submits a link to Reddit with a specified flair.
+ *
+ * @param {snoowrap} redditClient - Snoowrap instance for Reddit API access.
+ * @param {string} subreddit - The subreddit to post in.
+ * @param {string} title - The title of the post.
+ * @param {string} url - The URL to submit.
+ * @param {string} flairId - The flair template ID to apply.
+ * @param {string} flairText - Optional flair text (if allowed by the subreddit).
+ * @returns {Promise<object|null>} A Promise resolving to the submission object or null if submission fails.
+ */
+async function submitLinkWithFlair(redditClient, subreddit, title, url, flairId, flairText) {
   try {
-    const subredditInstance = r.getSubreddit(subreddit);
-    const posts: Submission[] = await subredditInstance.getHot({ limit });
-    return posts;
-  } catch (error) {
-    console.error('Error fetching posts:', error);
-    throw error; // Rethrow to handle it in the caller
-  }
-};
+    const subredditObj = redditClient.getSubreddit(subreddit);
 
-// Function to submit a link with flair
-async function submitLinkWithFlair(
-  subreddit: string,
-  title: string,
-  url: string,
-  flairId?: string,
-  flairText?: string
-): Promise<Submission | null> {
-  try {
-    const subredditObj = r.getSubreddit(subreddit);
-
-    const submissionOptions: snoowrap.SubmitLinkOptions = {
+    // Prepare the options for the submission
+    const options = {
       title: title,
       url: url,
+      resubmit: false,
     };
+    
+    if (flairId) options.flairId = flairId;
+    if (flairText) options.flairText = flairText;
+    // Submit the link with flair
+    const mySubmission = await subredditObj.submitLink(options);
 
-    if (flairId || flairText) {
-      submissionOptions.flair = {};
-      if (flairId) {
-        submissionOptions.flair_id = flairId;
-        console.log(`Used flairId: ${flairId}`);
-      }
-      if (flairText) {
-        submissionOptions.flair_text = flairText;
-        console.log(`Used flairText: ${flairText}`);
-      }
-    }
-
-    const post: Submission = await subredditObj.submitLink(submissionOptions);
-    console.log(`Post submitted successfully: ${post.url}`);
-    return post;
-  } catch (error: any) { // Type as any to access error.message
-    console.error('Error submitting post:', error);
-    // Optionally, handle specific Reddit API errors
-    if (error.message.includes('SUBMIT_VALIDATION_FLAIR_REQUIRED')) {
-      console.error('Flair is required but was not set correctly.');
-    }
+    console.log(`Post submitted successfully: ${mySubmission.url}`);
+    return mySubmission;
+  } catch (error) {
+    console.error('Error submitting post with flair:', error);
     return null;
   }
 }
 
+/**
+ * Handles a GET request in a Next.js API route.
+ *
+ * Example usage:
+ * - Calls `submitLinkWithFlair` to submit a post to Reddit and returns the result.
+ */
 export async function GET() {
-  // Define the post details
-  const postTitle = 'A Tale of Two Cities by Charles Dickens';
-  const postUrl = 'https://publicdomainlibrary.org/en/books/a-tale-of-two-cities';
-  const flairText = 'Classic';
-  const flairId = "a0931564-ffaf-11e2-9318-12313b0cf20e"; // Ensure this is set correctly
+  const redditClient = new snoowrap({
+    userAgent: process.env.REDDIT_USER_AGENT || '',
+    clientId: process.env.REDDIT_CLIENT_ID || '',
+    clientSecret: process.env.REDDIT_CLIENT_SECRET || '',
+    username: process.env.REDDIT_USERNAME || '',
+    password: process.env.REDDIT_PASSWORD || '',
+  });
+
+  const subreddit = 'FreeEBOOKS';
+  const linkTitle = 'A Tale of Two Cities by Charles Dickens';
+  const linkUrl = 'https://publicdomainlibrary.org/en/books/a-tale-of-two-cities';
+  const flairId = 'a0931564-ffaf-11e2-9318-12313b0cf20e'; // Replace with the correct flair template ID for the subreddit
 
   try {
-    // Submit the link with flair and capture the returned Submission object
-    const submittedPost = await submitLinkWithFlair(
-      'FreeEBOOKS',
-      postTitle,
-      postUrl,
-      flairId  //undefined //Pass the flairId
+    const submission = await submitLinkWithFlair(
+      redditClient,
+      subreddit,
+      linkTitle,
+      linkUrl,
+      flairId,
+      ''
     );
 
-    if (submittedPost) {
+    if (submission) {
       return NextResponse.json({
+        success: true,
         message: 'Post submitted successfully!',
-        postUrl: submittedPost.url,
+        submissionUrl: submission.url,
       });
     } else {
-      return NextResponse.json({ error: 'Failed to submit the post.' }, { status: 500 });
+      return NextResponse.json({
+        success: false,
+        message: 'Failed to submit the post.',
+      });
     }
   } catch (error) {
-    console.error('GET /reddit error:', error);
-    return NextResponse.json({ error: 'Failed to fetch posts.' }, { status: 500 });
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'An error occurred while processing the request.',
+        error: error.message,
+      },
+      { status: 500 }
+    );
   }
 }

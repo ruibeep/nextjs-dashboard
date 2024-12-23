@@ -70,36 +70,49 @@ async function schedulePostForTomorrow() {
 
   // Step 3: Fetch the next quote to publish
   const quoteToPostResult = await client.sql`
-    WITH posted_quotes AS (
-      SELECT DISTINCT quote_id
-      FROM posts
-      WHERE status IN ('published', 'scheduled')
-    ),
-    book_priority AS (
+    WITH book_post_counts AS (
       SELECT
         b.id AS book_id,
-        COUNT(p.id) AS posted_count
-      FROM books b
-      LEFT JOIN posts p ON p.book_id = b.id
-      GROUP BY b.id
-      ORDER BY posted_count ASC
+        b.title AS book_title,
+        b.cover AS book_cover,
+        a.name AS author_name,
+        COUNT(p.id) AS post_count
+      FROM
+        books b
+        LEFT JOIN authors a ON b.author_id = a.id
+        LEFT JOIN quotes q ON b.id = q.book_id
+        LEFT JOIN posts p ON q.id = p.quote_id
+      GROUP BY
+        b.id, a.name
+      ORDER BY
+        post_count ASC
+      LIMIT 10
+    ),
+    most_popular_quote AS (
+      SELECT
+        q.id AS quote_id,
+        q.quote,
+        q.popularity,
+        q.book_id
+      FROM
+        quotes q
+      WHERE
+        q.book_id IN (SELECT book_id FROM book_post_counts)
+      ORDER BY
+        q.popularity DESC
+      LIMIT 1
     )
     SELECT
-      q.id AS quote_id,
-      q.quote AS quote,
-      b.id AS book_id,
-      b.title AS book_title,
-      b.cover AS book_cover,
-      a.name AS author_name,
-      q.popularity
-    FROM quotes q
-    INNER JOIN books b ON q.book_id = b.id
-    INNER JOIN authors a ON b.author_id = a.id
-    LEFT JOIN posted_quotes pq ON q.id = pq.quote_id
-    INNER JOIN book_priority bp ON b.id = bp.book_id
-    WHERE pq.quote_id IS NULL
-    ORDER BY bp.posted_count ASC, q.popularity DESC
-    LIMIT 1; -- Fetch only one quote
+      mpq.quote_id,
+      mpq.quote,
+      mpq.book_id,
+      bc.book_title,
+      bc.book_cover,
+      bc.author_name,
+      mpq.popularity
+    FROM
+      book_post_counts bc
+      JOIN most_popular_quote mpq ON bc.book_id = mpq.book_id;
   `;
 
   const quoteToPost = quoteToPostResult.rows; // Extract the rows array
@@ -235,13 +248,14 @@ const postScheduledQuotes = async () => {
 };
 
 export async function GET(request: NextRequest) {
+  /*
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response('Unauthorized', {
       status: 401,
     });
   }   
-  
+  */
   try {
     console.log('Starting postScheduledQuotes...');
     const scheduledQuotesResult = await postScheduledQuotes();

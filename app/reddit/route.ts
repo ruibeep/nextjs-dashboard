@@ -1,6 +1,31 @@
 const snoowrap = require('snoowrap');
 const { NextResponse } = require('next/server');
 
+async function getLatestPosts(redditClient, subreddit, limit = 10) {
+  try {
+    // Get the subreddit object
+    const subredditObj = redditClient.getSubreddit(subreddit);
+
+    // Fetch the latest posts (default sorting is 'new')
+    const posts = await subredditObj.getNew({ limit });
+
+    // Map the results to include only essential details
+    const formattedPosts = posts.map(post => ({
+      title: post.title,
+      url: post.url,
+      author: post.author.name,
+      created_utc: post.created_utc,
+      id: post.id,
+    }));
+
+    console.log(`Fetched ${formattedPosts.length} posts from /r/${subreddit}`);
+    return formattedPosts;
+  } catch (error) {
+    console.error('Error fetching posts:', error);
+    return null;
+  }
+}
+
 /**
  * Submits a link to Reddit with a specified flair.
  *
@@ -36,12 +61,72 @@ async function submitLinkWithFlair(redditClient, subreddit, title, url, flairId,
   }
 }
 
+// The main GET API route
+export async function GET() {
+  const redditClient = new snoowrap({
+    userAgent: process.env.REDDIT_USER_AGENT || '',
+    clientId: process.env.REDDIT_CLIENT_ID || '',
+    clientSecret: process.env.REDDIT_CLIENT_SECRET || '',
+    username: process.env.REDDIT_USERNAME || '',
+    password: process.env.REDDIT_PASSWORD || '',
+  });
+
+  const subreddit = 'FreeEBOOKS';
+  const linkTitle = 'A Tale of Two Cities by Charles Dickens';
+  const linkUrl = 'https://publicdomainlibrary.org/en/books/a-tale-of-two-cities';
+  const flairId = 'a0931564-ffaf-11e2-9318-12313b0cf20e'; // Replace with the correct flair template ID
+
+  try {
+    // Fetch the latest posts from the subreddit
+    const latestPosts = await getLatestPosts(redditClient, 'suggestmeabook');
+
+    return NextResponse.json({
+      success: true,
+      data: latestPosts,
+    });
+    /*
+    // Submit a new post
+    const submission = await submitLinkWithFlair(
+      redditClient,
+      subreddit,
+      linkTitle,
+      linkUrl,
+      flairId,
+      ''
+    );
+
+    if (submission) {
+      return NextResponse.json({
+        success: true,
+        message: 'Post submitted successfully!',
+        submissionUrl: submission.url,
+      });
+    } else {
+      return NextResponse.json({
+        success: false,
+        message: 'Failed to submit the post.',
+      });
+    }*/
+  } catch (error) {
+    console.error('Unexpected error:', error);
+    return NextResponse.json(
+      {
+        success: false,
+        message: 'An error occurred while processing the request.',
+        error: error.message,
+      },
+      { status: 500 }
+    );
+  }
+}
+
 /**
  * Handles a GET request in a Next.js API route.
  *
  * Example usage:
  * - Calls `submitLinkWithFlair` to submit a post to Reddit and returns the result.
  */
+/*
 export async function GET() {
   const redditClient = new snoowrap({
     userAgent: process.env.REDDIT_USER_AGENT || '',
@@ -90,3 +175,4 @@ export async function GET() {
     );
   }
 }
+*/

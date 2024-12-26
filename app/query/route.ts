@@ -14,8 +14,8 @@ const twitterClient = new TwitterApi({
   accessSecret: process.env.X_ACCESS_TOKEN_SECRET?.trim() || '',
 });
 
-// Fetch posts scheduled for today
-const fetchScheduledPosts = async () => {
+// Fetch posts scheduled for today 
+async function fetchScheduledPosts() {
   const today = formatISO(new Date(), { representation: 'date' });
   const todayStart = `${today} 00:00:00`;
   const todayEnd = `${today} 23:59:59`;
@@ -44,8 +44,14 @@ const fetchScheduledPosts = async () => {
     }
     throw error; // Re-throw the error after logging
   }
-};
+}
 
+// Writes a new post to the database
+  // Step 1: Get tomorrow's date 
+  // Step 2: Check if there are already posts for tomorrow
+  // Step 3: Fetch the next quote to publish
+  // Step 4: Build the post text dynamically with the full book title  
+  // Step 5: Insert the new post for tomorrow
 async function schedulePostForTomorrow() {
   // Step 1: Get tomorrow's date 
   const today = new Date();
@@ -155,7 +161,7 @@ async function downloadImage(url: string): Promise<Buffer> {
 }
 
 // Post a single quote to Twitter
-const postToTwitter = async (text:string, imageLink?: string | null) => {
+async function postToTwitter(text:string, imageLink?: string | null) {
   try {
     if (imageLink) {
       console.log('Downloading image...');
@@ -186,10 +192,10 @@ const postToTwitter = async (text:string, imageLink?: string | null) => {
     }
     throw error; // Re-throw the error after logging
   }
-};
+}
 
 // Update post status after successful publishing
-const updatePostStatus = async (postId:number) => {
+async function updatePostStatus(postId:number) {
   const query = `
     UPDATE posts
     SET status = 'published'
@@ -209,10 +215,10 @@ const updatePostStatus = async (postId:number) => {
     throw error; // Re-throw the error after logging         
 
   }
-};
+}
 
 // Main function to handle scheduled posts for today
-const postScheduledQuotes = async () => {
+async function postScheduledQuotes() {
   try {
     console.log('Fetching scheduled posts...');
     const scheduledPosts = await fetchScheduledPosts();
@@ -249,17 +255,16 @@ const postScheduledQuotes = async () => {
     }
     throw error; // Re-throw the error after logging 
   }
-};
+}
 
 export async function GET(request: NextRequest) {
-  /*
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response('Unauthorized', {
       status: 401,
     });
   }   
-  */
+
   try {
     console.log('Starting postScheduledQuotes...');
     const scheduledQuotesResult = await postScheduledQuotes();

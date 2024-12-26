@@ -68,6 +68,7 @@ async function schedulePostForTomorrow() {
   }
 
 
+  console.log('Fetch the next quote to publish...');
   // Step 3: Fetch the next quote to publish
   const quoteToPostResult = await client.sql`
     WITH book_post_counts AS (
@@ -114,7 +115,9 @@ async function schedulePostForTomorrow() {
       book_post_counts bc
       JOIN most_popular_quote mpq ON bc.book_id = mpq.book_id;
   `;
+  console.log('Query executed');
 
+  
   const quoteToPost = quoteToPostResult.rows; // Extract the rows array
 
   if (quoteToPost.length === 0) {
@@ -124,7 +127,8 @@ async function schedulePostForTomorrow() {
   
   const item = quoteToPost[0]; // Access the first item in the rows array
   // Step 4: Build the post text dynamically with the full book title
-  const postText = `"${item.quote}" - ${item.book_title} by ${item.author_name}`;
+  const postText = `"${item.quote}" - ${item.book_title} by ${item.author_name} #ebooks #mustread #booklovers #book #ReadersCommunity #bookrecommendations #kindlebooks #ClassicLitMonday #BookologyThursday`;
+  
   // Step 5: Insert the new post for tomorrow
   const data = await client.sql`
     INSERT INTO posts (quote_id, text, image_link, platform, status, published_date)

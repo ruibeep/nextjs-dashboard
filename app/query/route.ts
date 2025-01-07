@@ -76,50 +76,83 @@ async function schedulePostForTomorrow() {
 
   console.log('Fetch the next quote to publish...');
   // Step 3: Fetch the next quote to publish
+  // Used ChatGPT for creating this SQL query.
+  // https://chatgpt.com/share/677d0a6c-a840-8010-8815-5ad1b9226577
   const quoteToPostResult = await client.sql`
-    WITH book_post_counts AS (
+    WITH book_quote_counts AS (
       SELECT
         b.id AS book_id,
         b.title AS book_title,
         b.cover AS book_cover,
         a.name AS author_name,
-        COUNT(p.id) AS post_count
+        COUNT(p.id) AS book_post_count
       FROM
         books b
-        LEFT JOIN authors a ON b.author_id = a.id
+        JOIN authors a ON b.author_id = a.id
         LEFT JOIN quotes q ON b.id = q.book_id
         LEFT JOIN posts p ON q.id = p.quote_id
       GROUP BY
-        b.id, a.name
-      ORDER BY
-        post_count ASC
-      LIMIT 10
+        b.id, b.title, b.cover, a.name
     ),
-    most_popular_quote AS (
+    quote_post_counts AS (
       SELECT
         q.id AS quote_id,
         q.quote,
         q.popularity,
-        q.book_id
+        q.book_id,
+        COUNT(p.id) AS quote_post_count
       FROM
         quotes q
-      WHERE
-        q.book_id IN (SELECT book_id FROM book_post_counts)
+        LEFT JOIN posts p ON q.id = p.quote_id
+      GROUP BY
+        q.id, q.quote, q.popularity, q.book_id
+    ),
+    filtered_books AS (
+      SELECT
+        bq.book_id,
+        bq.book_title,
+        bq.book_cover,
+        bq.author_name,
+        MIN(qpc.quote_post_count) AS min_quote_post_count,
+        bq.book_post_count
+      FROM
+        book_quote_counts bq
+        JOIN quote_post_counts qpc ON bq.book_id = qpc.book_id
+      GROUP BY
+        bq.book_id, bq.book_title, bq.book_cover, bq.author_name, bq.book_post_count
       ORDER BY
-        q.popularity DESC
-      LIMIT 1
+        bq.book_post_count ASC
+    ),
+    final_quotes AS (
+      SELECT
+        qpc.quote_id,
+        qpc.quote,
+        qpc.book_id,
+        fb.book_title,
+        fb.book_cover,
+        fb.author_name,
+        qpc.popularity
+      FROM
+        filtered_books fb
+        JOIN quote_post_counts qpc ON fb.book_id = qpc.book_id
+      WHERE
+        qpc.quote_post_count = fb.min_quote_post_count
+      ORDER BY
+        fb.book_post_count ASC,
+        qpc.quote_post_count ASC,
+        qpc.popularity DESC
     )
     SELECT
-      mpq.quote_id,
-      mpq.quote,
-      mpq.book_id,
-      bc.book_title,
-      bc.book_cover,
-      bc.author_name,
-      mpq.popularity
+      quote_id,
+      quote,
+      book_id,
+      book_title,
+      book_cover,
+      author_name,
+      popularity
     FROM
-      book_post_counts bc
-      JOIN most_popular_quote mpq ON bc.book_id = mpq.book_id;
+      final_quotes
+    LIMIT 1;
   `;
   console.log('Query executed');
 
@@ -225,8 +258,7 @@ async function postScheduledQuotes() {
     console.log('Fetch scheduled posts done.');
 
     if (!scheduledPosts.length) {
-      console.log('No posts scheduled for today.');
-      return;
+      console.error('No posts scheduled for today.');
     }
 
     console.log(`Found ${scheduledPosts.length} posts for today. Posting...`);
@@ -257,13 +289,13 @@ async function postScheduledQuotes() {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest) {  
   const authHeader = request.headers.get('authorization');
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
     return new Response('Unauthorized', {
       status: 401,
     });
-  }   
+  }
 
   try {
     console.log('Starting postScheduledQuotes...');

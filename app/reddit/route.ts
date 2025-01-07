@@ -72,8 +72,8 @@ export async function GET() {
   });
 
   const subreddit = 'FreeEBOOKS';
-  const linkTitle = 'A Tale of Two Cities by Charles Dickens';
-  const linkUrl = 'https://publicdomainlibrary.org/en/books/a-tale-of-two-cities';
+  const linkTitle = 'Crime and Punishment by Fyodor Dostoevsky';
+  const linkUrl = 'https://publicdomainlibrary.org/en/books/crime-and-punishment';
   const flairId = 'a0931564-ffaf-11e2-9318-12313b0cf20e'; // Replace with the correct flair template ID
 
   try {
